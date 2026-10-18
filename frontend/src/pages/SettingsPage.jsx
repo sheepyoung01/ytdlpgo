@@ -1,0 +1,104 @@
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button, Flex, Form, Input, Space, message } from 'antd';
+import {
+    GetSettings,
+    SaveSettings,
+    SelectFile,
+    SelectFFmpeg,
+    DetectYtdlp,
+    DetectFFmpeg,
+} from '../../wailsjs/go/main/App';
+import { EventsEmit } from '../../wailsjs/runtime/runtime';
+
+export default function SettingsPage() {
+    const navigate = useNavigate();
+    const [form] = Form.useForm();
+    const [msg, holder] = message.useMessage();
+
+    // 进入页面时读取本地配置
+    useEffect(() => {
+        GetSettings()
+            .then((s) => form.setFieldsValue({
+                ytdlpPath: s.ytdlpPath,
+                ffmpegPath: s.ffmpegPath,
+            }))
+            .catch((err) => console.error('读取设置失败:', err));
+    }, [form]);
+
+    const browseYtdlp = async () => {
+        const path = await SelectFile();
+        if (path) form.setFieldValue('ytdlpPath', path);
+    };
+
+    const browseFfmpeg = async () => {
+        const path = await SelectFFmpeg();
+        if (path) form.setFieldValue('ffmpegPath', path);
+    };
+
+    const detectYtdlp = async () => {
+        try {
+            const path = await DetectYtdlp();
+            form.setFieldValue('ytdlpPath', path);
+            msg.success(`已检测到 yt-dlp：${path}`);
+        } catch (e) {
+            msg.error(String(e));
+        }
+    };
+
+    const detectFfmpeg = async () => {
+        try {
+            const path = await DetectFFmpeg();
+            form.setFieldValue('ffmpegPath', path);
+            msg.success(`已检测到 ffmpeg：${path}`);
+        } catch (e) {
+            msg.error(String(e));
+        }
+    };
+
+    const save = async () => {
+        const values = await form.validateFields();
+        await SaveSettings({
+            ytdlpPath: values.ytdlpPath,
+            ffmpegPath: values.ffmpegPath,
+        });
+        EventsEmit('settings-changed');
+        msg.success('已保存');
+    };
+
+    return (
+        <div className="page">
+            {holder}
+            <Form form={form} layout="horizontal" colon={false} labelCol={{ flex: '100px' }}>
+                <Form.Item label="yt-dlp 路径" labelCol={{ flex: '100px' }}>
+                    <Flex align="center" gap={10}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                            <Form.Item name="ytdlpPath" noStyle>
+                                <Input placeholder="点击选择或手动填写" />
+                            </Form.Item>
+                        </div>
+                        <a onClick={browseYtdlp}>浏览</a>
+                        <a onClick={detectYtdlp}>自动检测</a>
+                    </Flex>
+                </Form.Item>
+                <Form.Item label="ffmpeg 路径" labelCol={{ flex: '100px' }}>
+                    <Flex align="center" gap={10}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                            <Form.Item name="ffmpegPath" noStyle>
+                                <Input placeholder="点击选择或手动填写（时段截取需要）" />
+                            </Form.Item>
+                        </div>
+                        <a onClick={browseFfmpeg}>浏览</a>
+                        <a onClick={detectFfmpeg}>自动检测</a>
+                    </Flex>
+                </Form.Item>
+                <Form.Item label=" ">
+                    <Space>
+                        <Button type="primary" onClick={save}>保存</Button>
+                        <Button onClick={() => navigate('/')}>返回首页</Button>
+                    </Space>
+                </Form.Item>
+            </Form>
+        </div>
+    );
+}
