@@ -1,19 +1,86 @@
+:root {
+    color-scheme: light;
+    --bg: #f7f8fa;
+    --sidebar-bg: #f4f5f7;
+    --card-bg: #ffffff;
+    --border: #ededf1;
+    --border-strong: #e2e3e9;
+    --text: #1f2329;
+    --text-secondary: #62666e;
+    --text-muted: #9aa0a8;
+    --primary: #7c5cfc;
+    --primary-strong: #6a49f5;
+    --primary-soft: #f2edff;
+    --green: #22a75a;
+    --green-soft: #eaf9f0;
+    --red: #d9534f;
+    --red-soft: #fdf0f0;
+    --amber: #c78a1b;
+    --amber-soft: #fdf6e7;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    height: 100%;
+}
+
 html {
-    background-color: #e6e6e6;
     overflow: hidden;
+    background: var(--bg);
 }
 
 body {
     margin: 0;
-    font-family: "Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
-    "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--text);
+    font-family: inherit;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-@font-face {
-    font-family: "Nunito";
-    font-style: normal;
-    font-weight: 400;
-    src: local(""),
-    url("../assets/fonts/nunito-v16-latin-regular.woff2") format("woff2");
+button,
+input,
+textarea,
+select {
+    font-family: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+::selection {
+    background: rgba(124, 92, 252, 0.18);
+}
+
+::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background: #d6d8de;
+    background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #c4c6cd;
+    background-clip: content-box;
 }

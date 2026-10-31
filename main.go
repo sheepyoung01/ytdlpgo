@@ -6,6 +6,7 @@ import (
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/options/mac"
 )
 
 //go:embed all:frontend/dist
@@ -17,15 +18,19 @@ func main() {
 
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:         "ytdlpgo",
-		Width:         970,
-		Height:        742,
-		DisableResize: true,
+		Title:     "ytdlpgo",
+		Width:     1360,
+		Height:    900,
+		MinWidth:  1120,
+		MinHeight: 720,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
-		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
+		BackgroundColour: &options.RGBA{R: 247, G: 248, B: 250, A: 1},
 		OnStartup:        app.startup,
+		Mac: &mac.Options{
+			TitleBar: mac.TitleBarHiddenInset(),
+		},
 		Bind: []interface{}{
 			app,
 		},

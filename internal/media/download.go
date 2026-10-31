@@ -36,6 +36,7 @@ func RunDownload(ctx context.Context, opts DownloadOptions, emit func(string)) e
 	args := []string{
 		"--cookies-from-browser", "chrome",
 		"--newline", // 让进度逐行输出，方便读取
+		"--no-playlist",
 		"-f", opts.FormatExpr,
 		"--no-update",
 	}
