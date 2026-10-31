@@ -28,6 +28,7 @@ type ToolStatus struct {
 	FfmpegVersion string `json:"ffmpegVersion"`
 	FfmpegReady   bool   `json:"ffmpegReady"`
 	ConfigPath    string `json:"configPath"`
+	CookieBrowser string `json:"cookieBrowser"`
 }
 
 // NewApp creates a new App application struct
@@ -80,8 +81,9 @@ func (a *App) GetToolStatus() (ToolStatus, error) {
 	}
 
 	status := ToolStatus{
-		YtdlpPath:  s.YtdlpPath,
-		FfmpegPath: s.FfmpegPath,
+		YtdlpPath:     s.YtdlpPath,
+		FfmpegPath:    s.FfmpegPath,
+		CookieBrowser: platform.CookieBrowser(),
 	}
 	if p, err := config.Path(); err == nil {
 		status.ConfigPath = p

@@ -13,7 +13,7 @@
 - **侧边栏**：视频下载 / 音频下载 / 设置三个入口，底部常驻工具状态与版本。
 - **页面切换保持状态**：基于 `keepalive-for-react`（keep-alive），切到设置页再回来内容不丢失。
 - **跨平台**：macOS / Linux / Windows 的路径与可执行文件查找已分别处理，Windows 下隐藏控制台窗口。
-- **登录态**：通过 `--cookies-from-browser chrome` 复用本机 Chrome 的 cookies。
+- **登录态**：Windows 通过 `--cookies-from-browser firefox` 复用本机 Firefox 的 cookies（避开 Chrome App-Bound Encryption）；macOS / Linux 继续使用 Chrome。
 
 ## 技术栈
 
@@ -52,7 +52,7 @@ wails build      # 生产构建，产物在 build/bin
 5. 点击「下载」，执行过程会实时输出到「下载详情」；完成后可点击「打开文件夹」。
 
 > 时段截取与转码都依赖 ffmpeg；未配置时相关控件与下载按钮会被禁用并提示。
-> 需要登录态时，请确保本机 Chrome 已登录对应网站，程序会通过 `--cookies-from-browser chrome` 读取 cookies。
+> 需要登录态时：Windows 请确保本机 Firefox 已登录对应网站，程序会通过 `--cookies-from-browser firefox` 读取 cookies；macOS / Linux 使用 Chrome。
 
 ## 配置
 

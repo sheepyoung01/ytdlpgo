@@ -131,7 +131,7 @@ export function FileIcon({ size = 19, ...props }) {
     );
 }
 
-export function ChromeIcon({ size = 19, ...props }) {
+export function BrowserIcon({ size = 19, ...props }) {
     return (
         <Svg size={size} {...props}>
             <circle cx="12" cy="12" r="8.4" />

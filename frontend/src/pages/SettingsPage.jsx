@@ -15,7 +15,7 @@ import {
     AlertIcon,
     CheckCircleIcon,
     CheckIcon,
-    ChromeIcon,
+    BrowserIcon,
     FileIcon,
     FilmIcon,
     InfoIcon,
@@ -121,6 +121,8 @@ export default function SettingsPage() {
 
     const ytdlpState = detectState(ytdlpPath, toolStatus?.ytdlpPath, toolStatus?.ytdlpReady);
     const ffmpegState = detectState(ffmpegPath, toolStatus?.ffmpegPath, toolStatus?.ffmpegReady);
+    const cookieBrowser = toolStatus?.cookieBrowser || 'chrome';
+    const browserName = cookieBrowser === 'firefox' ? 'Firefox' : 'Chrome';
 
     const headerBadge = !loaded
         ? { text: '正在读取配置', tone: 'neutral' }
@@ -220,11 +222,11 @@ export default function SettingsPage() {
                         <div className="network-grid">
                             <div className="info-tile">
                                 <div className="info-tile-icon">
-                                    <ChromeIcon size={20} />
+                                    <BrowserIcon size={20} />
                                 </div>
                                 <div className="info-tile-body">
-                                    <div className="info-tile-title">Chrome 登录状态</div>
-                                    <div className="info-tile-desc">自动读取本机 Chrome 的 Cookies</div>
+                                    <div className="info-tile-title">{browserName} 登录状态</div>
+                                    <div className="info-tile-desc">自动读取本机 {browserName} 的 Cookies</div>
                                 </div>
                                 <span className="info-tile-state">已启用</span>
                             </div>
@@ -246,8 +248,9 @@ export default function SettingsPage() {
                         <p className="network-hint">
                             <InfoIcon size={15} />
                             <span>
-                                解析与下载会通过 <code>--cookies-from-browser chrome</code> 读取登录状态，
-                                请确保本机 Chrome 已登录目标站点。若站点无法访问，可先尝试在 Chrome 中打开并播放一次。
+                                解析与下载会通过 <code>--cookies-from-browser {cookieBrowser}</code> 读取登录状态，
+                                请确保本机 {browserName} 已登录目标站点。若站点无法访问，可先尝试在 {browserName} 中打开并播放一次。
+                                {cookieBrowser === 'firefox' && ' Windows 端使用 Firefox 以避开 Chrome App-Bound Encryption 限制。'}
                             </span>
                         </p>
                     </section>

@@ -3,3 +3,4 @@ node_modules
 frontend/dist
 ytdlpgo
 .idea
+.DS_Store

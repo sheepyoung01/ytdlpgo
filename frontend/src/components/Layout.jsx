@@ -53,6 +53,7 @@ export default function Layout() {
 
     const ytdlpReady = Boolean(toolStatus?.ytdlpReady);
     const ffmpegReady = Boolean(toolStatus?.ffmpegReady);
+    const browserName = toolStatus?.cookieBrowser === 'firefox' ? 'Firefox' : 'Chrome';
 
     return (
         <div className={`layout${isMac ? ' is-mac' : ''}`}>
@@ -151,7 +152,7 @@ export default function Layout() {
             >
                 <ol className="help-list">
                     <li>粘贴视频链接后会自动解析可用清晰度，解析过程可能需要几秒。</li>
-                    <li>下载会读取本机 Chrome 登录状态，请确保 Chrome 已登录目标站点。</li>
+                    <li>下载会读取本机 {browserName} 登录状态，请确保 {browserName} 已登录目标站点。</li>
                     <li>时段截取与音频转码需要配置 ffmpeg，可在「设置」页自动检测。</li>
                     <li>下载内容仅用于个人备份，请遵守站点条款。</li>
                 </ol>

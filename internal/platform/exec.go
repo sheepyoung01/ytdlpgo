@@ -101,6 +101,16 @@ func FindYtdlp() string {
 	return FindExecutable("yt-dlp")
 }
 
+// CookieBrowser 返回读取登录 Cookies 使用的浏览器。
+// Windows 使用 Firefox，规避 Chrome 的 App-Bound Encryption；
+// macOS / Linux 继续使用 Chrome。
+func CookieBrowser() string {
+	if runtime.GOOS == "windows" {
+		return "firefox"
+	}
+	return "chrome"
+}
+
 // ExecutableVersion 运行可执行文件并返回标准输出（用于读取版本信息）
 func ExecutableVersion(ctx context.Context, path string, args ...string) string {
 	ctx, cancel := context.WithTimeout(ctx, 6*time.Second)

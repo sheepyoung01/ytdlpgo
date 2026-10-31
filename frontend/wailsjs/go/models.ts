@@ -27,6 +27,7 @@ export namespace main {
 	    ffmpegVersion: string;
 	    ffmpegReady: boolean;
 	    configPath: string;
+	    cookieBrowser: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new ToolStatus(source);
@@ -41,6 +42,7 @@ export namespace main {
 	        this.ffmpegVersion = source["ffmpegVersion"];
 	        this.ffmpegReady = source["ffmpegReady"];
 	        this.configPath = source["configPath"];
+	        this.cookieBrowser = source["cookieBrowser"];
 	    }
 	}
 

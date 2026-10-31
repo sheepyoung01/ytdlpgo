@@ -24,7 +24,7 @@ func FetchInfo(ctx context.Context, ytdlpPath, videoURL string) (ytdlpInfo, erro
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, ytdlpPath,
-		"--cookies-from-browser", "chrome",
+		"--cookies-from-browser", platform.CookieBrowser(),
 		"--no-warnings",
 		"--no-playlist",
 		"-J",
