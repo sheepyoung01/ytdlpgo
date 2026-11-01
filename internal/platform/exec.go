@@ -2,6 +2,7 @@ package platform
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -127,22 +128,21 @@ func ExecutableVersion(ctx context.Context, path string, args ...string) string 
 	return strings.TrimSpace(string(out))
 }
 
-// OpenInFileManager 用系统文件管理器打开路径
+// OpenInFileManager 用系统文件管理器打开路径（文件所在目录）
 func OpenInFileManager(path string) error {
-	var cmd *exec.Cmd
-	switch runtime.GOOS {
-	case "darwin":
-		cmd = exec.Command("open", path)
-	case "windows":
-		cmd = exec.Command("explorer", path)
-	default:
-		cmd = exec.Command("xdg-open", path)
+	path = strings.TrimSpace(path)
+	if path == "" {
+		return fmt.Errorf("路径为空")
 	}
-	HideWindow(cmd)
-
-	if err := cmd.Start(); err != nil {
+	info, err := os.Stat(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return fmt.Errorf("目录不存在: %s", path)
+		}
 		return err
 	}
-	go func() { _ = cmd.Wait() }()
-	return nil
+	if !info.IsDir() {
+		path = filepath.Dir(path)
+	}
+	return openInFileManager(path)
 }
