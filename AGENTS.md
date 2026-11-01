@@ -42,7 +42,7 @@ frontend/src/styles      全局与页面样式
 - 下载日志事件名：视频 `download-log`，音频 `audio-log`。
 - 更新进度事件名：`update-progress`（阶段：downloading / verifying / installing / restarting）。
 - 设置保存后前端会 `EventsEmit('settings-changed')`，媒体页监听以刷新 ffmpeg 状态。
-- 发布流程由 `.github/workflows/release.yml` 负责：推送 `v*` tag 后构建 Windows NSIS 安装器与 macOS DMG，生成 `SHA256SUMS.txt` 并发布到 GitHub Release。
+- 发布流程由 `.github/workflows/release.yml` 负责：推送到 `master`（含 PR 合并）或手动触发时，读取最新 `v*` tag 作为版本，构建 Windows NSIS 安装器与 macOS DMG，生成 `SHA256SUMS.txt` 并更新该 tag 的 GitHub Release。
 
 ## 关键约定（务必遵守）
 
