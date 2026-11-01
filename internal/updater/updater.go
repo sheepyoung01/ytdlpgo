@@ -53,6 +53,7 @@ type githubRelease struct {
 
 type githubAsset struct {
 	Name               string `json:"name"`
+	URL                string `json:"url"`
 	BrowserDownloadURL string `json:"browser_download_url"`
 }
 
@@ -96,8 +97,8 @@ func Check(ctx context.Context, repo, currentVersion string) (ReleaseInfo, error
 		return info, err
 	}
 	info.AssetName = installer.Name
-	info.AssetURL = installer.BrowserDownloadURL
-	info.ChecksumURL = checksum.BrowserDownloadURL
+	info.AssetURL = preferredDownloadURL(installer)
+	info.ChecksumURL = preferredDownloadURL(checksum)
 	return info, nil
 }
 
@@ -130,7 +131,7 @@ func Download(ctx context.Context, assetURL, assetName, checksumURL, destDir str
 	if err != nil {
 		return "", err
 	}
-	req.Header.Set("User-Agent", userAgent)
+	applyDownloadHeaders(req, assetURL)
 
 	client := &http.Client{Timeout: 20 * time.Minute}
 	resp, err := client.Do(req)
@@ -280,7 +281,7 @@ func fetchChecksum(ctx context.Context, checksumURL, assetName string) (string, 
 	if err != nil {
 		return "", err
 	}
-	req.Header.Set("User-Agent", userAgent)
+	applyDownloadHeaders(req, checksumURL)
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -304,15 +305,37 @@ func fetchChecksum(ctx context.Context, checksumURL, assetName string) (string, 
 	return "", fmt.Errorf("校验文件中没有找到 %s", assetName)
 }
 
+func preferredDownloadURL(asset githubAsset) string {
+	// 优先使用 api.github.com 的 asset 接口下载：部分网络环境下
+	// github.com 下载域名不可达，但 api.github.com 可以正常访问。
+	if asset.URL != "" {
+		return asset.URL
+	}
+	return asset.BrowserDownloadURL
+}
+
+func applyDownloadHeaders(req *http.Request, rawURL string) {
+	req.Header.Set("User-Agent", userAgent)
+	parsed, err := url.Parse(rawURL)
+	if err == nil && strings.EqualFold(parsed.Host, "api.github.com") {
+		req.Header.Set("Accept", "application/octet-stream")
+	}
+}
+
 func validateGitHubDownloadURL(raw string) error {
 	parsed, err := url.Parse(raw)
 	if err != nil {
 		return fmt.Errorf("更新地址不合法")
 	}
-	if !strings.EqualFold(parsed.Scheme, "https") || !strings.EqualFold(parsed.Host, "github.com") {
+	if !strings.EqualFold(parsed.Scheme, "https") {
 		return fmt.Errorf("更新地址不受信任")
 	}
-	if !strings.Contains(parsed.Path, "/releases/download/") {
+
+	isBrowserURL := strings.EqualFold(parsed.Host, "github.com") &&
+		strings.Contains(parsed.Path, "/releases/download/")
+	isAPIURL := strings.EqualFold(parsed.Host, "api.github.com") &&
+		strings.Contains(parsed.Path, "/releases/assets/")
+	if !isBrowserURL && !isAPIURL {
 		return fmt.Errorf("更新地址不是 GitHub Release 资源")
 	}
 	return nil

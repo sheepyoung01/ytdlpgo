@@ -68,3 +68,26 @@ func TestSafeFileName(t *testing.T) {
 		t.Fatalf("unexpected safe filename result: %q, %v", safe, err)
 	}
 }
+
+func TestValidateGitHubDownloadURL(t *testing.T) {
+	valid := []string{
+		"https://github.com/sheepyoung01/ytdlpgo/releases/download/v1.0.0/app.exe",
+		"https://api.github.com/repos/sheepyoung01/ytdlpgo/releases/assets/123",
+	}
+	for _, value := range valid {
+		if err := validateGitHubDownloadURL(value); err != nil {
+			t.Fatalf("expected %q to be valid: %v", value, err)
+		}
+	}
+
+	invalid := []string{
+		"http://github.com/sheepyoung01/ytdlpgo/releases/download/v1.0.0/app.exe",
+		"https://example.com/app.exe",
+		"https://api.github.com/repos/other/repo",
+	}
+	for _, value := range invalid {
+		if err := validateGitHubDownloadURL(value); err == nil {
+			t.Fatalf("expected %q to be rejected", value)
+		}
+	}
+}
