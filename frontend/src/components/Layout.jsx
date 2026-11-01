@@ -54,6 +54,7 @@ export default function Layout() {
     const ytdlpReady = Boolean(toolStatus?.ytdlpReady);
     const ffmpegReady = Boolean(toolStatus?.ffmpegReady);
     const browserName = toolStatus?.cookieBrowser === 'firefox' ? 'Firefox' : 'Chrome';
+    const appVersion = toolStatus?.appVersion || '1.0.0';
 
     return (
         <div className={`layout${isMac ? ' is-mac' : ''}`}>
@@ -132,7 +133,7 @@ export default function Layout() {
                         </div>
                     </div>
 
-                    <div className="app-version">v1.0.0</div>
+                    <div className="app-version">v{appVersion}</div>
                 </aside>
 
                 <main className="main">

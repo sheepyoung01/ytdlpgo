@@ -44,8 +44,8 @@ jobs:
       - name: Build Windows installer
         shell: pwsh
         run: |
-          wails build -platform windows/amd64 -nsis -clean
           $version = $env:GITHUB_REF_NAME -replace '^v', ''
+          wails build -platform windows/amd64 -nsis -installscope user -clean -ldflags "-X main.appVersion=$version"
           Move-Item "build/bin/ytdlpgo-amd64-installer.exe" "build/bin/ytdlpgo-$version-windows-amd64-installer.exe"
 
       - uses: actions/upload-artifact@v4
@@ -78,7 +78,9 @@ jobs:
         run: echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
 
       - name: Build macOS app
-        run: wails build -platform darwin/universal -clean
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          wails build -platform darwin/universal -clean -ldflags "-X main.appVersion=$VERSION"
 
       - name: Package DMG
         env:
@@ -110,6 +112,11 @@ jobs:
         with:
           path: dist
           merge-multiple: true
+
+      - name: Generate checksums
+        run: |
+          cd dist
+          sha256sum * > SHA256SUMS.txt
 
       - uses: softprops/action-gh-release@v2
         with:

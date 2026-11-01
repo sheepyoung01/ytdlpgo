@@ -11,6 +11,7 @@
 - **保存与打开目录**：默认保存到 `~/Downloads/ytdlpgo`（不存在时自动创建），可浏览选择其他目录，一键在文件管理器中打开。
 - **设置页**：配置 yt-dlp / ffmpeg 路径，支持「浏览」选择、「自动检测」、保存到本地配置文件，并展示工具版本与检测状态。
 - **侧边栏**：视频下载 / 音频下载 / 设置三个入口，底部常驻工具状态与版本。
+- **自动更新**：设置页检查 GitHub Releases，发现新版本后下载当前平台安装包、校验 SHA256，并在后台静默安装并重启应用。
 - **页面切换保持状态**：基于 `keepalive-for-react`（keep-alive），切到设置页再回来内容不丢失。
 - **跨平台**：macOS / Linux / Windows 的路径与可执行文件查找已分别处理，Windows 下隐藏控制台窗口。
 - **登录态**：Windows 通过 `--cookies-from-browser firefox` 复用本机 Firefox 的 cookies（避开 Chrome App-Bound Encryption）；macOS / Linux 继续使用 Chrome。
@@ -53,6 +54,7 @@ wails build      # 生产构建，产物在 build/bin
 
 > 时段截取与转码都依赖 ffmpeg；未配置时相关控件与下载按钮会被禁用并提示。
 > 需要登录态时：Windows 请确保本机 Firefox 已登录对应网站，程序会通过 `--cookies-from-browser firefox` 读取 cookies；macOS / Linux 使用 Chrome。
+> 自动更新会在下载后校验 Release 中的 `SHA256SUMS.txt`；Windows 安装器使用 user scope 构建，才能在当前用户权限下静默更新。公开分发前建议对安装包做代码签名/公证。
 
 ## 配置
 
@@ -88,10 +90,11 @@ wails build      # 生产构建，产物在 build/bin
 │   │   ├── models.go        # 格式/结果数据类型
 │   │   ├── formats.go       # 拉取并过滤视频/音频格式
 │   │   └── download.go      # 执行下载、时段校验、日志流
-│   └── platform/
-│       ├── exec.go          # 跨平台可执行文件查找、PATH
-│       ├── exec_unix.go     # 非 Windows
-│       └── exec_windows.go  # Windows 隐藏控制台
+│   ├── platform/
+│   │   ├── exec.go          # 跨平台可执行文件查找、PATH
+│   │   ├── exec_unix.go     # 非 Windows
+│   │   └── exec_windows.go  # Windows 隐藏控制台
+│   └── updater/             # GitHub Release 检查、下载校验、静默安装
 └── frontend/
     ├── index.html
     ├── package.json
@@ -104,6 +107,7 @@ wails build      # 生产构建，产物在 build/bin
         ├── pages/           # VideoPage / AudioPage / SettingsPage
         ├── hooks/           # useToolStatus（工具状态刷新）
         ├── utils/           # 时间、格式、进度解析
+        ├── assets/          # 应用图标等静态资源
         └── styles/          # global.css / App.css
 ```
 

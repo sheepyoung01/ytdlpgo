@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
 import { Button, Input, message } from 'antd';
 import {
+    CheckForUpdate,
     DetectFFmpeg,
     DetectYtdlp,
+    DownloadAndInstallUpdate,
     GetSettings,
     SaveSettings,
     SelectFFmpeg,
     SelectFile,
 } from '../../wailsjs/go/main/App';
-import { EventsEmit } from '../../wailsjs/runtime/runtime';
+import { EventsEmit, EventsOn } from '../../wailsjs/runtime/runtime';
 import useToolStatus from '../hooks/useToolStatus';
 import PageHeader from '../components/PageHeader';
 import {
@@ -16,6 +18,7 @@ import {
     CheckCircleIcon,
     CheckIcon,
     BrowserIcon,
+    DownloadIcon,
     FileIcon,
     FilmIcon,
     InfoIcon,
@@ -32,6 +35,10 @@ export default function SettingsPage() {
     const [ffmpegPath, setFfmpegPath] = useState('');
     const [original, setOriginal] = useState({ ytdlpPath: '', ffmpegPath: '' });
     const [loaded, setLoaded] = useState(false);
+
+    const [checkingUpdate, setCheckingUpdate] = useState(false);
+    const [updateStatus, setUpdateStatus] = useState('');
+    const [updateProgress, setUpdateProgress] = useState(null);
 
     useEffect(() => {
         GetSettings()
@@ -50,6 +57,22 @@ export default function SettingsPage() {
                 msg.error(`读取设置失败：${err}`);
             });
     }, [msg]);
+
+    useEffect(() => {
+        const cancel = EventsOn('update-progress', (progress) => {
+            setUpdateProgress(progress);
+            if (progress.stage === 'downloading') {
+                setUpdateStatus(`正在下载更新 ${Math.round(progress.percent || 0)}%`);
+            } else if (progress.stage === 'verifying') {
+                setUpdateStatus('正在校验安装包…');
+            } else if (progress.stage === 'installing') {
+                setUpdateStatus('正在启动安装程序…');
+            } else if (progress.stage === 'restarting') {
+                setUpdateStatus('应用即将重启完成更新…');
+            }
+        });
+        return () => cancel();
+    }, []);
 
     const dirty = ytdlpPath !== original.ytdlpPath || ffmpegPath !== original.ffmpegPath;
 
@@ -110,6 +133,33 @@ export default function SettingsPage() {
         msg.info('已恢复默认值，点击「保存设置」后生效');
     };
 
+    const checkAndUpdate = async () => {
+        if (checkingUpdate) return;
+
+        setCheckingUpdate(true);
+        setUpdateProgress(null);
+        setUpdateStatus('正在检查更新…');
+        try {
+            const info = await CheckForUpdate();
+            if (info.isLatest) {
+                setUpdateStatus(`当前已是最新版本 v${info.currentVersion}`);
+                msg.success('当前已是最新版本');
+                return;
+            }
+
+            setUpdateStatus(`发现新版本 v${info.latestVersion}，正在下载安装器…`);
+            msg.info(`发现新版本 v${info.latestVersion}，开始下载`);
+            await DownloadAndInstallUpdate();
+            setUpdateStatus('安装程序已启动，应用即将重启完成更新…');
+        } catch (e) {
+            setUpdateProgress(null);
+            setUpdateStatus('检查更新失败，请稍后重试');
+            msg.error(String(e));
+        } finally {
+            setCheckingUpdate(false);
+        }
+    };
+
     const detectState = (path, savedPath, ready) => {
         if (!path) return { label: '未配置', tone: 'neutral' };
         if (!toolStatus) return { label: '检测中', tone: 'neutral' };
@@ -123,6 +173,7 @@ export default function SettingsPage() {
     const ffmpegState = detectState(ffmpegPath, toolStatus?.ffmpegPath, toolStatus?.ffmpegReady);
     const cookieBrowser = toolStatus?.cookieBrowser || 'chrome';
     const browserName = cookieBrowser === 'firefox' ? 'Firefox' : 'Chrome';
+    const appVersion = toolStatus?.appVersion || '1.0.0';
 
     const headerBadge = !loaded
         ? { text: '正在读取配置', tone: 'neutral' }
@@ -253,6 +304,40 @@ export default function SettingsPage() {
                                 {cookieBrowser === 'firefox' && ' Windows 端使用 Firefox 以避开 Chrome App-Bound Encryption 限制。'}
                             </span>
                         </p>
+                    </section>
+
+                    <section className="card update-card">
+                        <div className="card-head">
+                            <span className="card-title">版本更新</span>
+                            <span className="card-sub">从 GitHub Releases 获取最新版本</span>
+                        </div>
+                        <div className="update-row">
+                            <div className="update-info">
+                                <div className="update-version">当前版本 v{appVersion}</div>
+                                <p className="row-desc">{updateStatus || '检查并自动安装最新版本，更新后会自动重启'}</p>
+                            </div>
+                            <Button
+                                className="ghost-btn update-btn"
+                                icon={<DownloadIcon size={16} />}
+                                loading={checkingUpdate}
+                                onClick={checkAndUpdate}
+                            >
+                                检查更新
+                            </Button>
+                        </div>
+                        {updateProgress && ['downloading', 'verifying'].includes(updateProgress.stage) && (
+                            <div className="update-progress">
+                                <div className="progress-track">
+                                    <div
+                                        className="progress-fill"
+                                        style={{ width: `${Math.max(0, Math.min(100, updateProgress.percent || 0))}%` }}
+                                    />
+                                </div>
+                                <span className="update-percent">
+                                    {Math.round(updateProgress.percent || 0)}%
+                                </span>
+                            </div>
+                        )}
                     </section>
 
                     <section className="card save-card">
