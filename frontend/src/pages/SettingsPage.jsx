@@ -339,25 +339,19 @@ export default function SettingsPage() {
                         )}
                     </section>
 
-                    <section className="card save-card">
-                        <span className="save-note">
-                            <InfoIcon size={15} />
-                            设置保存在本机，不会上传
-                        </span>
-                        <div className="save-actions">
-                            <Button className="ghost-btn" onClick={restore}>
-                                恢复默认
-                            </Button>
-                            <Button
-                                type="primary"
-                                className="primary-btn"
-                                icon={<CheckIcon size={16} />}
-                                onClick={save}
-                            >
-                                保存设置
-                            </Button>
-                        </div>
-                    </section>
+                    <div className="save-actions">
+                        <Button className="ghost-btn" onClick={restore}>
+                            恢复默认
+                        </Button>
+                        <Button
+                            type="primary"
+                            className="primary-btn"
+                            icon={<CheckIcon size={16} />}
+                            onClick={save}
+                        >
+                            保存设置
+                        </Button>
+                    </div>
                 </div>
             </div>
         </div>
