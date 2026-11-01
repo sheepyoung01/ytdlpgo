@@ -142,7 +142,7 @@ export default function SettingsPage() {
         try {
             const info = await CheckForUpdate();
             if (info.isLatest) {
-                setUpdateStatus(`当前已是最新版本 v${info.currentVersion}`);
+                setUpdateStatus('');
                 msg.success('当前已是最新版本');
                 return;
             }
@@ -313,7 +313,7 @@ export default function SettingsPage() {
                         <div className="update-row">
                             <div className="update-info">
                                 <div className="update-version">当前版本 v{appVersion}</div>
-                                <p className="row-desc">{updateStatus || '检查并自动安装最新版本，更新后会自动重启'}</p>
+                                {updateStatus && <p className="row-desc">{updateStatus}</p>}
                             </div>
                             <Button
                                 className="ghost-btn update-btn"
