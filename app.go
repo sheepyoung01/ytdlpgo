@@ -6,13 +6,20 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 
 	"ytdlpgo/internal/config"
 	"ytdlpgo/internal/media"
 	"ytdlpgo/internal/platform"
+	"ytdlpgo/internal/updater"
 )
+
+// appVersion 可通过 -ldflags "-X main.appVersion=x.y.z" 注入
+var appVersion = "1.0.0"
+
+const githubRepo = "sheepyoung01/ytdlpgo"
 
 // App struct（Wails 绑定的门面层，业务逻辑放在 internal/ 各包中）
 type App struct {
@@ -29,6 +36,7 @@ type ToolStatus struct {
 	FfmpegReady   bool   `json:"ffmpegReady"`
 	ConfigPath    string `json:"configPath"`
 	CookieBrowser string `json:"cookieBrowser"`
+	AppVersion    string `json:"appVersion"`
 }
 
 // NewApp creates a new App application struct
@@ -84,6 +92,7 @@ func (a *App) GetToolStatus() (ToolStatus, error) {
 		YtdlpPath:     s.YtdlpPath,
 		FfmpegPath:    s.FfmpegPath,
 		CookieBrowser: platform.CookieBrowser(),
+		AppVersion:    appVersion,
 	}
 	if p, err := config.Path(); err == nil {
 		status.ConfigPath = p
@@ -98,6 +107,56 @@ func (a *App) GetToolStatus() (ToolStatus, error) {
 		status.FfmpegReady = status.FfmpegVersion != ""
 	}
 	return status, nil
+}
+
+// CheckForUpdate 查询 GitHub 最新 Release 并比较版本
+func (a *App) CheckForUpdate() (updater.ReleaseInfo, error) {
+	return updater.Check(a.ctx, githubRepo, appVersion)
+}
+
+// DownloadAndInstallUpdate 下载当前平台安装包，校验后启动后台静默更新
+func (a *App) DownloadAndInstallUpdate() error {
+	info, err := updater.Check(a.ctx, githubRepo, appVersion)
+	if err != nil {
+		return err
+	}
+	if info.IsLatest {
+		return fmt.Errorf("当前已是最新版本")
+	}
+
+	tempDir, err := os.MkdirTemp("", "ytdlpgo-update-")
+	if err != nil {
+		return err
+	}
+
+	emit := func(progress updater.Progress) {
+		runtime.EventsEmit(a.ctx, "update-progress", progress)
+	}
+
+	installerPath, err := updater.Download(
+		a.ctx,
+		info.AssetURL,
+		info.AssetName,
+		info.ChecksumURL,
+		tempDir,
+		emit,
+	)
+	if err != nil {
+		_ = os.RemoveAll(tempDir)
+		return err
+	}
+
+	if err := updater.Install(installerPath, emit); err != nil {
+		_ = os.RemoveAll(tempDir)
+		return err
+	}
+
+	runtime.EventsEmit(a.ctx, "update-progress", updater.Progress{Stage: "restarting", Percent: 100})
+	go func() {
+		time.Sleep(800 * time.Millisecond)
+		runtime.Quit(a.ctx)
+	}()
+	return nil
 }
 
 // GetDefaultDownloadDir 返回默认下载目录（~/Downloads/ytdlpgo），不存在时自动创建

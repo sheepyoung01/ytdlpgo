@@ -29,6 +29,7 @@ app.go               App 结构体 + 所有 Wails 绑定方法（薄门面，只
 internal/config      设置类型与读写（os.UserConfigDir 下的 settings.json）
 internal/platform    跨平台可执行文件查找、PATH 环境、Windows HideWindow
 internal/media       格式拉取/过滤、下载执行、时段校验、日志流
+internal/updater     GitHub Release 检查、安装包下载校验、静默安装
 frontend/src/pages       页面组件（VideoPage / AudioPage / SettingsPage）
 frontend/src/components  共享组件（Layout / ErrorBoundary / MediaDownloadPage）
 frontend/src/utils       纯函数工具（时间解析等）
@@ -39,7 +40,9 @@ frontend/src/styles      全局与页面样式
 
 - 前端 → `app.go` 绑定方法 → `internal/*` → 返回结构体 / 通过事件推送日志。
 - 下载日志事件名：视频 `download-log`，音频 `audio-log`。
+- 更新进度事件名：`update-progress`（阶段：downloading / verifying / installing / restarting）。
 - 设置保存后前端会 `EventsEmit('settings-changed')`，媒体页监听以刷新 ffmpeg 状态。
+- 发布流程由 `.github/workflows/release.yml` 负责：推送到 `master`（含 PR 合并）或手动触发时，读取最新 `v*` tag 作为版本，构建 Windows NSIS 安装器与 macOS DMG，生成 `SHA256SUMS.txt` 并更新该 tag 的 GitHub Release。
 
 ## 关键约定（务必遵守）
 

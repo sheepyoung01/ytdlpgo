@@ -28,6 +28,7 @@ export namespace main {
 	    ffmpegReady: boolean;
 	    configPath: string;
 	    cookieBrowser: string;
+	    appVersion: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new ToolStatus(source);
@@ -43,6 +44,7 @@ export namespace main {
 	        this.ffmpegReady = source["ffmpegReady"];
 	        this.configPath = source["configPath"];
 	        this.cookieBrowser = source["cookieBrowser"];
+	        this.appVersion = source["appVersion"];
 	    }
 	}
 
@@ -155,6 +157,37 @@ export namespace media {
 		    }
 		    return a;
 		}
+	}
+
+}
+
+export namespace updater {
+	
+	export class ReleaseInfo {
+	    currentVersion: string;
+	    latestVersion: string;
+	    isLatest: boolean;
+	    releaseUrl: string;
+	    publishedAt: string;
+	    assetName: string;
+	    assetUrl: string;
+	    checksumUrl: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ReleaseInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.currentVersion = source["currentVersion"];
+	        this.latestVersion = source["latestVersion"];
+	        this.isLatest = source["isLatest"];
+	        this.releaseUrl = source["releaseUrl"];
+	        this.publishedAt = source["publishedAt"];
+	        this.assetName = source["assetName"];
+	        this.assetUrl = source["assetUrl"];
+	        this.checksumUrl = source["checksumUrl"];
+	    }
 	}
 
 }

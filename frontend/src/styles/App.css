@@ -1455,3 +1455,47 @@
         padding-bottom: 18px;
     }
 }
+
+/* ---------- 版本更新 ---------- */
+
+.update-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.update-info {
+    min-width: 0;
+}
+
+.update-version {
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #24272c;
+}
+
+.update-btn.ant-btn {
+    flex: 0 0 auto;
+}
+
+.update-progress {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 14px;
+}
+
+.update-progress .progress-track {
+    height: 6px;
+    background: #eeeff3;
+}
+
+.update-percent {
+    min-width: 40px;
+    text-align: right;
+    font-size: 12px;
+    color: #7b8089;
+    font-variant-numeric: tabular-nums;
+}

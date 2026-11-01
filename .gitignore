@@ -4,3 +4,5 @@ frontend/dist
 ytdlpgo
 .idea
 .DS_Store
+build/dist
+build/dmg
