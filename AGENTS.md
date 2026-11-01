@@ -78,4 +78,4 @@ frontend/src/styles      全局与页面样式
 - **Node 版本**：`.nvmrc` 为 22；Node 12 会导致 Vite 7 构建失败。
 - **开发服务器**：Vite 固定 `127.0.0.1:5173`（`strictPort`），`wails.json` 的 `frontend:dev:serverUrl` 也固定为该地址，避免 macOS 上 localhost 解析到 IPv6 造成空白窗口。
 - **antd**：`package.json` 当前为 antd v6，同时保留 `@ant-design/v5-patch-for-react-19`。升级/降级 antd 时需重新验证 React 19 兼容性与构建。
-- **cookies**：所有抓取/下载均使用 `--cookies-from-browser chrome`，要求本机 Chrome 已登录目标站点。
+- **cookies**：所有抓取/下载统一通过 `platform.CookieBrowser()` 选择浏览器：Windows 使用 Firefox（规避 Chrome App-Bound Encryption），macOS / Linux 使用 Chrome。要求目标浏览器已登录目标站点。

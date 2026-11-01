@@ -22,8 +22,16 @@ export function GetClipboardText() {
   return window['go']['main']['App']['GetClipboardText']();
 }
 
+export function GetDefaultDownloadDir() {
+  return window['go']['main']['App']['GetDefaultDownloadDir']();
+}
+
 export function GetSettings() {
   return window['go']['main']['App']['GetSettings']();
+}
+
+export function GetToolStatus() {
+  return window['go']['main']['App']['GetToolStatus']();
 }
 
 export function ListAudioFormats(arg1) {
@@ -32,6 +40,10 @@ export function ListAudioFormats(arg1) {
 
 export function ListVideoFormats(arg1) {
   return window['go']['main']['App']['ListVideoFormats'](arg1);
+}
+
+export function OpenFolder(arg1) {
+  return window['go']['main']['App']['OpenFolder'](arg1);
 }
 
 export function SaveSettings(arg1) {

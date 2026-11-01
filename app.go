@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 
@@ -14,6 +17,18 @@ import (
 // App struct（Wails 绑定的门面层，业务逻辑放在 internal/ 各包中）
 type App struct {
 	ctx context.Context
+}
+
+// ToolStatus 本机外部工具状态（返回给前端展示）
+type ToolStatus struct {
+	YtdlpPath     string `json:"ytdlpPath"`
+	YtdlpVersion  string `json:"ytdlpVersion"`
+	YtdlpReady    bool   `json:"ytdlpReady"`
+	FfmpegPath    string `json:"ffmpegPath"`
+	FfmpegVersion string `json:"ffmpegVersion"`
+	FfmpegReady   bool   `json:"ffmpegReady"`
+	ConfigPath    string `json:"configPath"`
+	CookieBrowser string `json:"cookieBrowser"`
 }
 
 // NewApp creates a new App application struct
@@ -56,6 +71,63 @@ func (a *App) SelectFFmpeg() (string, error) {
 // GetSettings 读取设置文件
 func (a *App) GetSettings() (config.Settings, error) {
 	return config.Load()
+}
+
+// GetToolStatus 读取 yt-dlp / ffmpeg 的配置与可用状态
+func (a *App) GetToolStatus() (ToolStatus, error) {
+	s, err := config.Load()
+	if err != nil {
+		return ToolStatus{}, err
+	}
+
+	status := ToolStatus{
+		YtdlpPath:     s.YtdlpPath,
+		FfmpegPath:    s.FfmpegPath,
+		CookieBrowser: platform.CookieBrowser(),
+	}
+	if p, err := config.Path(); err == nil {
+		status.ConfigPath = p
+	}
+
+	if s.YtdlpPath != "" {
+		status.YtdlpVersion = platform.ExecutableVersion(a.ctx, s.YtdlpPath, "--version")
+		status.YtdlpReady = status.YtdlpVersion != ""
+	}
+	if s.FfmpegPath != "" {
+		status.FfmpegVersion = firstLine(platform.ExecutableVersion(a.ctx, s.FfmpegPath, "-version"))
+		status.FfmpegReady = status.FfmpegVersion != ""
+	}
+	return status, nil
+}
+
+// GetDefaultDownloadDir 返回默认下载目录（~/Downloads/ytdlpgo），不存在时自动创建
+func (a *App) GetDefaultDownloadDir() (string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	dir := filepath.Join(home, "Downloads", "ytdlpgo")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return "", err
+	}
+	return dir, nil
+}
+
+// OpenFolder 用系统文件管理器打开下载目录
+func (a *App) OpenFolder(dir string) error {
+	dir = strings.TrimSpace(dir)
+	if dir == "" {
+		return fmt.Errorf("请先选择下载目录")
+	}
+	return platform.OpenInFileManager(dir)
+}
+
+// firstLine 取多行输出的第一行
+func firstLine(s string) string {
+	if i := strings.IndexByte(s, '\n'); i >= 0 {
+		s = s[:i]
+	}
+	return strings.TrimSpace(s)
 }
 
 // SaveSettings 保存设置

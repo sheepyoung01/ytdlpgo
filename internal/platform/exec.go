@@ -1,11 +1,13 @@
 package platform
 
 import (
+	"context"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 )
 
 // executableNames 返回某个可执行文件在当前平台的可能名字
@@ -97,4 +99,50 @@ func FindFFmpeg() string {
 // FindYtdlp 查找 yt-dlp
 func FindYtdlp() string {
 	return FindExecutable("yt-dlp")
+}
+
+// CookieBrowser 返回读取登录 Cookies 使用的浏览器。
+// Windows 使用 Firefox，规避 Chrome 的 App-Bound Encryption；
+// macOS / Linux 继续使用 Chrome。
+func CookieBrowser() string {
+	if runtime.GOOS == "windows" {
+		return "firefox"
+	}
+	return "chrome"
+}
+
+// ExecutableVersion 运行可执行文件并返回标准输出（用于读取版本信息）
+func ExecutableVersion(ctx context.Context, path string, args ...string) string {
+	ctx, cancel := context.WithTimeout(ctx, 6*time.Second)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, path, args...)
+	cmd.Env = CommandEnv()
+	HideWindow(cmd)
+
+	out, err := cmd.Output()
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(string(out))
+}
+
+// OpenInFileManager 用系统文件管理器打开路径
+func OpenInFileManager(path string) error {
+	var cmd *exec.Cmd
+	switch runtime.GOOS {
+	case "darwin":
+		cmd = exec.Command("open", path)
+	case "windows":
+		cmd = exec.Command("explorer", path)
+	default:
+		cmd = exec.Command("xdg-open", path)
+	}
+	HideWindow(cmd)
+
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+	go func() { _ = cmd.Wait() }()
+	return nil
 }

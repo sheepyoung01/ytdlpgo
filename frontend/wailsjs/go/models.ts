@@ -17,6 +17,37 @@ export namespace config {
 
 }
 
+export namespace main {
+	
+	export class ToolStatus {
+	    ytdlpPath: string;
+	    ytdlpVersion: string;
+	    ytdlpReady: boolean;
+	    ffmpegPath: string;
+	    ffmpegVersion: string;
+	    ffmpegReady: boolean;
+	    configPath: string;
+	    cookieBrowser: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ToolStatus(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.ytdlpPath = source["ytdlpPath"];
+	        this.ytdlpVersion = source["ytdlpVersion"];
+	        this.ytdlpReady = source["ytdlpReady"];
+	        this.ffmpegPath = source["ffmpegPath"];
+	        this.ffmpegVersion = source["ffmpegVersion"];
+	        this.ffmpegReady = source["ffmpegReady"];
+	        this.configPath = source["configPath"];
+	        this.cookieBrowser = source["cookieBrowser"];
+	    }
+	}
+
+}
+
 export namespace media {
 	
 	export class AudioFormat {
