@@ -309,7 +309,6 @@ export default function SettingsPage() {
                     <section className="card update-card">
                         <div className="card-head">
                             <span className="card-title">版本更新</span>
-                            <span className="card-sub">从 GitHub Releases 获取最新版本</span>
                         </div>
                         <div className="update-row">
                             <div className="update-info">
